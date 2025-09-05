@@ -1,11 +1,9 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, Pressable, Image as RNImage } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { StatusBar } from 'expo-status-bar';
-import * as NavigationBar from 'expo-navigation-bar';
+import { SearchBar } from '@/components/ui/SearchBar';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { SearchBar } from '@/components/ui/SearchBar';
+import React from 'react';
+import { FlatList, Pressable, Image as RNImage, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const services = [
   { id: 'car', icon: 'car-outline', label: 'Car' },
@@ -21,14 +19,9 @@ const services = [
 export default function GrabHomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  useEffect(() => {
-    NavigationBar.setBackgroundColorAsync('#000000');
-    NavigationBar.setButtonStyleAsync('light');
-  }, []);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-      <StatusBar style="dark" />
+    <SafeAreaView edges={['left', 'right', 'bottom']} style={{ flex: 1, backgroundColor: 'white' }}>
       <FlatList
         data={[0]}
         keyExtractor={(i, idx) => String(idx)}
@@ -55,7 +48,7 @@ export default function GrabHomeScreen() {
                     style={styles.tile}
                     onPress={() => s.id === 'food' && router.push('/food')}
                   >
-                    <Ionicons name={s.icon as any} size={26} color="#0F5132" />
+                    <Ionicons name={s.icon as any} size={20} color="#0F5132" />
                     <Text style={styles.tileText}>{s.label}</Text>
                   </Pressable>
                 ))}
@@ -113,10 +106,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   tile: {
-    width: '23%',
+    width: '20%',
     backgroundColor: '#ECFDF5',
     alignItems: 'center',
-    paddingVertical: 18,
+    paddingVertical: 16,
     borderRadius: 16,
   },
   tileText: {

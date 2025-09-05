@@ -1,14 +1,12 @@
-import React from 'react';
 import { Stack } from 'expo-router';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import React from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { StatusBar } from 'expo-status-bar';
 
 export default function OrderScreen() {
   const insets = useSafeAreaInsets();
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white', paddingTop: insets.top }}>
-      <StatusBar style="dark" backgroundColor="#ffffff" />
       <Stack.Screen options={{ title: 'Order' }} />
 
       <View style={{ padding: 16, gap: 12 }}>

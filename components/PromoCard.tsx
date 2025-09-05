@@ -1,6 +1,7 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
+import React from 'react';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 
 type Item = { id: string; title: string; price: string; image: string };
 
@@ -13,7 +14,7 @@ export const PromoCard = ({ items }: { items: Item[] }) => {
           <Text style={styles.subtitle}>RM1 delivery with no minimum spend.</Text>
         </View>
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>No min. spend</Text>
+          <MaterialCommunityIcons name="sale" size={28} color="#fff" />
         </View>
       </View>
       <FlatList
@@ -58,15 +59,13 @@ const styles = StyleSheet.create({
   },
   badge: {
     backgroundColor: '#FF8B8B',
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    borderRadius: 14,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  badgeText: {
-    color: 'white',
-    fontWeight: '600',
-    fontSize: 12,
-  },
+  // Removed badgeText in favor of icon-only circular badge
   item: {
     width: 120,
   },
@@ -84,4 +83,3 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
-

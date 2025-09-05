@@ -1,9 +1,8 @@
-import React from 'react';
-import { Stack, useRouter } from 'expo-router';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { StatusBar } from 'expo-status-bar';
+import { Stack, useRouter } from 'expo-router';
+import React from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function CartScreen() {
   const router = useRouter();
@@ -11,7 +10,6 @@ export default function CartScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white', paddingTop: insets.top }}>
-      <StatusBar style="dark" />
       <Stack.Screen options={{ title: 'My Cart' }} />
       <View style={styles.row}>
         <Image

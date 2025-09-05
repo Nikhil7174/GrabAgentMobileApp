@@ -5,18 +5,13 @@ import { SearchBar } from '@/components/ui/SearchBar';
 import { restaurants, yellowPromoItems } from '@/constants/mock';
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
-import * as NavigationBar from 'expo-navigation-bar';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function FoodHomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  useEffect(() => {
-    NavigationBar.setBackgroundColorAsync('#000000');
-    NavigationBar.setButtonStyleAsync('light');
-  }, []);
 
   const Header = (
     <View style={[styles.headerWrap, { paddingTop: insets.top + 8 }]}> 
@@ -53,9 +48,8 @@ export default function FoodHomeScreen() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
+    <SafeAreaView edges={['left', 'right', 'bottom']} style={{ flex: 1, backgroundColor: 'white' }}>
       <Stack.Screen options={{ headerShown: false }} />
-      {/* <StatusBar style="light" backgroundColor="#27AE60" /> */}
       <FlatList
         data={restaurants}
         keyExtractor={(i) => i.id}
@@ -155,7 +149,7 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: 16,
-    bottom: 24,
+    bottom: 64,
     backgroundColor: 'white',
     borderRadius: 16,
     padding: 12,

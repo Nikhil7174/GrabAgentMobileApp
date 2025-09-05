@@ -1,11 +1,10 @@
-import React from 'react';
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { View, Text, StyleSheet, FlatList, Pressable } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Image } from 'expo-image';
-import { Ionicons } from '@expo/vector-icons';
 import { restaurants } from '@/constants/mock';
-import { StatusBar } from 'expo-status-bar';
+import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import React from 'react';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const menu = [
   { id: '1', title: 'Chicken Burger', price: 'RM9.90', image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=800&q=60&auto=format&fit=crop' },
@@ -21,7 +20,6 @@ export default function RestaurantDetail() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white', paddingTop: insets.top }}>
-      <StatusBar style="dark" backgroundColor="#ffffff" />
       <Stack.Screen options={{ title: item.name }} />
       <FlatList
         data={menu}
