@@ -1,75 +1,163 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, Pressable, Image as RNImage } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
+import * as NavigationBar from 'expo-navigation-bar';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { SearchBar } from '@/components/ui/SearchBar';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+const services = [
+  { id: 'car', icon: 'car-outline', label: 'Car' },
+  { id: 'food', icon: 'fast-food-outline', label: 'Food' },
+  { id: 'mart', icon: 'bag-outline', label: 'Mart' },
+  { id: 'grocery', icon: 'cart-outline', label: 'Grocery' },
+  { id: 'express', icon: 'cube-outline', label: 'Express' },
+  { id: 'dine', icon: 'restaurant-outline', label: 'Dine Out' },
+  { id: 'banking', icon: 'card-outline', label: 'Banking' },
+  { id: 'all', icon: 'apps-outline', label: 'All' },
+];
 
-export default function HomeScreen() {
+export default function GrabHomeScreen() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  useEffect(() => {
+    NavigationBar.setBackgroundColorAsync('#000000');
+    NavigationBar.setButtonStyleAsync('light');
+  }, []);
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
+      <StatusBar style="dark" />
+      <FlatList
+        data={[0]}
+        keyExtractor={(i, idx) => String(idx)}
+        renderItem={() => null}
+        ListHeaderComponent={
+          <View>
+            <View style={[styles.header, { paddingTop: insets.top + 8 }]}> 
+              <View style={styles.headerRow}>
+                <Pressable style={styles.scanBtn}>
+                  <Ionicons name="scan-outline" size={20} color="#0F5132" />
+                </Pressable>
+                <View style={{ flex: 1, marginHorizontal: 10 }}>
+                  <SearchBar placeholder="Search the Grab app" />
+                </View>
+                <Pressable style={styles.avatar}>
+                  <Ionicons name="person-outline" size={20} color="#0F5132" />
+                </Pressable>
+              </View>
+
+              <View style={styles.grid}>
+                {services.map((s) => (
+                  <Pressable
+                    key={s.id}
+                    style={styles.tile}
+                    onPress={() => s.id === 'food' && router.push('/food')}
+                  >
+                    <Ionicons name={s.icon as any} size={26} color="#0F5132" />
+                    <Text style={styles.tileText}>{s.label}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.infoRow}>
+              <View style={styles.infoCard}><Text style={styles.infoTitle}>Activate</Text><Text style={styles.infoValue}>GrabPay</Text></View>
+              <View style={styles.infoCard}><Text style={styles.infoTitle}>Points</Text><Text style={styles.infoValue}>0</Text></View>
+            </View>
+
+            <View style={styles.sectionHeader}> 
+              <Text style={styles.sectionTitle}>Book now</Text>
+              <Ionicons name="chevron-forward" size={18} color="#6B7280" />
+            </View>
+            <RNImage
+              source={{ uri: 'https://images.unsplash.com/photo-1485841890310-6a055c88698a?q=60&auto=format&fit=crop&w=1200' }}
+              style={styles.bannerImg}
+            />
+            <Text style={styles.bannerCaption}>Amazing MATTA Fair offers await</Text>
+          </View>
+        }
+      />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  header: {
+    backgroundColor: '#4cc8b7',
+    padding: 16,
+    paddingBottom: 12,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  scanBtn: {
+    backgroundColor: 'white',
+    padding: 10,
+    borderRadius: 14,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  avatar: {
+    backgroundColor: 'white',
+    padding: 10,
+    borderRadius: 20,
+  },
+  grid: {
+    marginTop: 16,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    justifyContent: 'space-between',
+  },
+  tile: {
+    width: '23%',
+    backgroundColor: '#ECFDF5',
+    alignItems: 'center',
+    paddingVertical: 18,
+    borderRadius: 16,
+  },
+  tileText: {
+    marginTop: 8,
+    fontSize: 12,
+    color: '#0F5132',
+    fontWeight: '600',
+  },
+  infoRow: {
+    flexDirection: 'row',
+    gap: 12,
+    paddingHorizontal: 16,
+    marginTop: 12,
+  },
+  infoCard: {
+    flex: 1,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    padding: 14,
+    backgroundColor: 'white',
+  },
+  infoTitle: { color: '#6B7280' },
+  infoValue: { marginTop: 4, fontWeight: '700' },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    marginTop: 20,
+  },
+  sectionTitle: { fontSize: 20, fontWeight: '700' },
+  bannerImg: {
+    height: 170,
+    marginHorizontal: 16,
+    marginTop: 12,
+    borderRadius: 12,
+  },
+  bannerCaption: {
+    paddingHorizontal: 16,
+    marginTop: 10,
+    color: '#111827',
   },
 });
