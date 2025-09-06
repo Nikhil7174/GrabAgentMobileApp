@@ -1,6 +1,8 @@
 import { SearchBar } from '@/components/ui/SearchBar';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import CartFab from '@/components/CartFab';
+import OrderToast from '@/components/OrderToast';
 import React from 'react';
 import { FlatList, Pressable, Image as RNImage, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -72,6 +74,8 @@ export default function GrabHomeScreen() {
           </View>
         }
       />
+      <CartFab />
+      <OrderToast />
     </SafeAreaView>
   );
 }

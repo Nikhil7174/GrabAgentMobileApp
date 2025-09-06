@@ -4,6 +4,8 @@ import { Chip } from '@/components/ui/Chip';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { restaurants, yellowPromoItems } from '@/constants/mock';
 import { Ionicons } from '@expo/vector-icons';
+import CartFab from '@/components/CartFab';
+import OrderToast from '@/components/OrderToast';
 import { Stack, useRouter } from 'expo-router';
 import React from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -78,10 +80,8 @@ export default function FoodHomeScreen() {
         ListFooterComponent={<View style={{ height: 8 }} />}
       />
 
-      <Pressable style={styles.fab} onPress={() => router.push('/cart')}>
-        <Ionicons name="bag-handle" size={22} color="#111827" />
-        <View style={styles.dot} />
-      </Pressable>
+      <CartFab />
+      <OrderToast />
     </SafeAreaView>
   );
 }
@@ -146,26 +146,5 @@ const styles = StyleSheet.create({
     marginTop: 16,
     paddingHorizontal: 16,
   },
-  fab: {
-    position: 'absolute',
-    right: 16,
-    bottom: 64,
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 12,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-  },
-  dot: {
-    position: 'absolute',
-    right: 8,
-    top: 8,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#EF4444',
-  },
+  
 });

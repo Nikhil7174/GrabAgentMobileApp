@@ -4,7 +4,7 @@ import { Image } from 'expo-image';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const menu = [
   { id: '1', title: 'Chicken Burger', price: 'RM9.90', image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=800&q=60&auto=format&fit=crop' },
@@ -16,10 +16,9 @@ export default function RestaurantDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const item = restaurants.find((r) => r.id === id) ?? restaurants[0];
-  const insets = useSafeAreaInsets();
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'white', paddingTop: insets.top }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }} edges={['bottom']}>
       <Stack.Screen options={{ title: item.name }} />
       <FlatList
         data={menu}
