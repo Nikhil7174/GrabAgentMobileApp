@@ -25,7 +25,7 @@ export default function RestaurantDetail() {
         keyExtractor={(i) => i.id}
         ListHeaderComponent={
           <View>
-            <Image source={{ uri: item.image }} style={styles.cover} />
+            <Image source={{ uri: item.image }} style={styles.cover} contentFit="cover" />
             <View style={{ padding: 16 }}>
               <Text style={styles.title}>{item.name}</Text>
               <Text style={styles.sub}>
@@ -41,7 +41,7 @@ export default function RestaurantDetail() {
               <Text style={styles.menuTitle}>{m.title}</Text>
               <Text style={styles.menuPrice}>{m.price}</Text>
             </View>
-            <Image source={{ uri: m.image }} style={styles.menuImage} />
+            <Image source={{ uri: m.image }} style={styles.menuImage} contentFit="cover" />
           </View>
         )}
         contentContainerStyle={{ paddingBottom: 100 }}

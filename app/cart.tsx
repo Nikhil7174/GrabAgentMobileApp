@@ -28,6 +28,7 @@ export default function CartScreen() {
         <Image
           source={{ uri: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=800&q=60&auto=format&fit=crop' }}
           style={styles.thumb}
+          contentFit="cover"
         />
       </Pressable>
 
@@ -39,6 +40,7 @@ export default function CartScreen() {
         <Image
           source={{ uri: 'https://images.unsplash.com/photo-1604908554049-9109f1d2ac69?w=800&q=60&auto=format&fit=crop' }}
           style={styles.thumb}
+          contentFit="cover"
         />
       </Pressable>
 

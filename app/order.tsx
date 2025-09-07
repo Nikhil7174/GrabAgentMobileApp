@@ -56,7 +56,7 @@ export default function OrderScreen() {
 
         {orderItems.map((it) => (
           <View key={it.id} style={styles.itemRow}>
-            <Image source={{ uri: it.image }} style={styles.itemThumb} />
+            <Image source={{ uri: it.image }} style={styles.itemThumb} contentFit="cover" />
             <View style={{ flex: 1 }}>
               <Text style={styles.itemTitle}>{it.title}</Text>
               <Pressable hitSlop={6}><Text style={styles.edit}>Edit</Text></Pressable>
@@ -77,7 +77,7 @@ export default function OrderScreen() {
           contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}
           renderItem={({ item }) => (
             <View style={styles.recoCard}>
-              <Image source={{ uri: item.image }} style={styles.recoImage} />
+              <Image source={{ uri: item.image }} style={styles.recoImage} contentFit="cover" />
               <Pressable style={styles.addBtn} accessibilityRole="button" accessibilityLabel={`Add ${item.title}`}>
                 <Text style={styles.addBtnText}>+</Text>
               </Pressable>

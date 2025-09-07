@@ -9,11 +9,11 @@ type Props = {
   onPress?: () => void;
 };
 
-export const RestaurantCard: React.FC<Props> = ({ item, onPress }) => {
+const RestaurantCardCmp: React.FC<Props> = ({ item, onPress }) => {
   const price = '• '.repeat(item.price).trim();
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.row, pressed && { opacity: 0.7 }]}>
-      <Image source={{ uri: item.image }} style={styles.thumb} />
+      <Image source={{ uri: item.image }} style={styles.thumb} contentFit="cover" />
       <View style={{ flex: 1 }}>
         <Text numberOfLines={1} style={styles.name}>
           {item.name}
@@ -34,6 +34,8 @@ export const RestaurantCard: React.FC<Props> = ({ item, onPress }) => {
     </Pressable>
   );
 };
+
+export const RestaurantCard = React.memo(RestaurantCardCmp);
 
 const styles = StyleSheet.create({
   row: {
@@ -63,4 +65,3 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
 });
-

@@ -5,7 +5,7 @@ import { FlatList, StyleSheet, Text, View } from 'react-native';
 
 type Item = { id: string; title: string; price: string; image: string };
 
-export const PromoCard = ({ items }: { items: Item[] }) => {
+const PromoCardCmp = ({ items }: { items: Item[] }) => {
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
@@ -25,7 +25,7 @@ export const PromoCard = ({ items }: { items: Item[] }) => {
         contentContainerStyle={{ gap: 12 }}
         renderItem={({ item }) => (
           <View style={styles.item}>
-            <Image source={{ uri: item.image }} style={styles.image} />
+            <Image source={{ uri: item.image }} style={styles.image} contentFit="cover" />
             <Text numberOfLines={2} style={styles.itemTitle}>
               {item.title}
             </Text>
@@ -36,6 +36,8 @@ export const PromoCard = ({ items }: { items: Item[] }) => {
     </View>
   );
 };
+
+export const PromoCard = React.memo(PromoCardCmp);
 
 const styles = StyleSheet.create({
   container: {

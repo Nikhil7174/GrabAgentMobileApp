@@ -7,7 +7,8 @@ import React from 'react';
 import { FlatList, Pressable, Image as RNImage, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const services = [
+type IoniconName = keyof typeof Ionicons.glyphMap;
+const services: { id: string; icon: IoniconName; label: string }[] = [
   { id: 'car', icon: 'car-outline', label: 'Car' },
   { id: 'food', icon: 'fast-food-outline', label: 'Food' },
   { id: 'mart', icon: 'bag-outline', label: 'Mart' },
@@ -50,7 +51,7 @@ export default function GrabHomeScreen() {
                     style={styles.tile}
                     onPress={() => s.id === 'food' && router.push('/food')}
                   >
-                    <Ionicons name={s.icon as any} size={20} color="#0F5132" />
+                    <Ionicons name={s.icon} size={20} color="#0F5132" />
                     <Text style={styles.tileText}>{s.label}</Text>
                   </Pressable>
                 ))}
