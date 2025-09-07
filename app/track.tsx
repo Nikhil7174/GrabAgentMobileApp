@@ -14,7 +14,12 @@ export default function TrackOrderScreen() {
         options={{
           title: 'Track Order',
           headerRight: () => (
-            <Pressable hitSlop={8} accessibilityRole="button" accessibilityLabel="Get help">
+            <Pressable
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel="Get help"
+              onPress={() => router.push('/assistant')}
+            >
               <Text style={styles.help}>Get help</Text>
             </Pressable>
           ),
