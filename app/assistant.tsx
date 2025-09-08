@@ -122,8 +122,8 @@ export default function OrderAssistantScreen() {
         {/* Vertical timeline list */}
         <View style={styles.timelineWrap} onLayout={(e) => setListH(e.nativeEvent.layout.height)}>
           <View style={styles.timelineLine} />
-          {received.map((u) => (
-            <AnimatedTimelineRow key={u.id} item={u} />
+          {received.map((u, index) => (
+            <AnimatedTimelineRow key={`${u.id}-${index}`} item={u} />
           ))}
         </View>
       </Animated.View>
@@ -132,7 +132,7 @@ export default function OrderAssistantScreen() {
       <KeyboardAvoidingView 
         style={styles.flex}
         behavior={Platform.select({ ios: 'padding', android: 'padding' })}
-        keyboardVerticalOffset={Platform.select({ ios: 90, android: 80 })}
+        keyboardVerticalOffset={Platform.select({ ios: 110, android: 100 })}
       >
         <ScrollView 
           contentContainerStyle={styles.chatList} 
