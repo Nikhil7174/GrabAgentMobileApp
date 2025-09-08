@@ -1,9 +1,9 @@
+import { useOrderToast } from '@/state/OrderToastContext';
 import { Image } from 'expo-image';
 import { Stack, useRouter } from 'expo-router';
 import React from 'react';
 import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useOrderToast } from '@/state/OrderToastContext';
 
 const orderItems = [
   {
@@ -11,7 +11,7 @@ const orderItems = [
     title: 'Nasi Goreng Kampung',
     price: 23.6,
     qty: 2,
-    image: 'https://images.unsplash.com/photo-1604908554049-9109f1d2ac69?w=800&q=60&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=800&q=60&auto=format&fit=crop',
   },
   {
     id: '2',
@@ -29,7 +29,7 @@ const alsoOrdered = [
 ];
 
 function currency(n: number) {
-  return `RM${n.toFixed(2)}`;
+  return `RM ${n.toFixed(2)}`;
 }
 
 export default function OrderScreen() {
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
   totalsBox: { marginTop: 12, paddingHorizontal: 16, paddingVertical: 12, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#E5E7EB' },
   lineBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginVertical: 6 },
   gray: { color: '#6B7280' },
-  totalBar: { position: 'absolute', left: 0, right: 0, bottom: 0, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingTop: 12, backgroundColor: 'white', borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#E5E7EB' },
+  totalBar: { position: 'absolute', left: 0, right: 0, bottom: 12, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingTop: 12, backgroundColor: 'white', borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#E5E7EB' },
   totalLabel: { color: '#6B7280' },
   totalAmount: { fontWeight: '800', fontSize: 16 },
   placeOrder: { backgroundColor: '#22C55E', paddingVertical: 14, paddingHorizontal: 18, borderRadius: 12, alignItems: 'center' },

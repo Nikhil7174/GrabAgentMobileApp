@@ -1,8 +1,8 @@
+import CartFab from '@/components/CartFab';
+import OrderToast from '@/components/OrderToast';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import CartFab from '@/components/CartFab';
-import OrderToast from '@/components/OrderToast';
 import React from 'react';
 import { FlatList, Pressable, Image as RNImage, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -31,7 +31,7 @@ export default function GrabHomeScreen() {
         renderItem={() => null}
         ListHeaderComponent={
           <View>
-            <View style={[styles.header, { paddingTop: insets.top + 8 }]}> 
+            <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
               <View style={styles.headerRow}>
                 <Pressable style={styles.scanBtn}>
                   <Ionicons name="scan-outline" size={20} color="#0F5132" />
@@ -59,23 +59,50 @@ export default function GrabHomeScreen() {
             </View>
 
             <View style={styles.infoRow}>
-              <View style={styles.infoCard}><Text style={styles.infoTitle}>Activate</Text><Text style={styles.infoValue}>GrabPay</Text></View>
-              <View style={styles.infoCard}><Text style={styles.infoTitle}>Points</Text><Text style={styles.infoValue}>0</Text></View>
+              <View style={styles.infoCard}>
+                <View style={styles.infoContent}>
+                  <View>
+                    <Text style={styles.infoTitle}>Activate</Text>
+                    <View style={styles.valueRow}>
+                      <Text style={styles.infoValue}>GrabPay</Text>
+                      <View style={styles.infoIcon}>
+                        <Ionicons name="wallet" size={20} color="#00B14F" />
+                      </View>
+                    </View>
+                  </View>
+                </View>
+              </View>
+              <View style={styles.infoCard}>
+                <View style={styles.infoContent}>
+                  <View>
+                    <Text style={styles.infoTitle}>Points</Text>
+                    <View style={styles.valueRow}>
+                      <Text style={styles.infoValue}>50</Text>
+                      <View style={styles.infoIcon}>
+                        <Ionicons name="pricetags" size={20} color="#00B14F" />
+                      </View>
+                    </View>
+                  </View>
+                </View>
+              </View>
             </View>
 
-            <View style={styles.sectionHeader}> 
+            <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Book now</Text>
               <Ionicons name="chevron-forward" size={18} color="#6B7280" />
             </View>
             <RNImage
-              source={{ uri: 'https://images.unsplash.com/photo-1485841890310-6a055c88698a?q=60&auto=format&fit=crop&w=1200' }}
+              source={{ uri: 'https://assets.grab.com/wp-content/uploads/sites/8/2021/06/21202207/In-App-Inbox-750x365.jpg' }}
               style={styles.bannerImg}
             />
-            <Text style={styles.bannerCaption}>Amazing MATTA Fair offers await</Text>
+            <Text style={styles.bannerCaption}>Limited-time ride & food deals</Text>
+
           </View>
         }
       />
-      <CartFab />
+      <View style={{marginBottom: -80}}>
+        <CartFab />
+      </View>
       <OrderToast />
     </SafeAreaView>
   );
@@ -104,7 +131,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   grid: {
-    marginTop: 16,
+    marginTop: 28,
+    marginBottom: 16,
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 12,
@@ -137,8 +165,29 @@ const styles = StyleSheet.create({
     padding: 14,
     backgroundColor: 'white',
   },
-  infoTitle: { color: '#6B7280' },
-  infoValue: { marginTop: 4, fontWeight: '700' },
+  infoContent: {
+    flex: 1,
+  },
+  valueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 0,
+  },
+  infoIcon: {
+    backgroundColor: '#ECFDF5',
+    padding: 4,
+    borderRadius: 8,
+    marginLeft: 8,
+  },
+  infoTitle: { 
+    color: '#6B7280',
+    fontSize: 13,
+  },
+  infoValue: { 
+    fontWeight: '700',
+    fontSize: 15,
+  },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -38,7 +38,7 @@ export default function CartScreen() {
           <Text style={styles.sub}>3 items • From 30 mins • 4.0 km</Text>
         </View>
         <Image
-          source={{ uri: 'https://images.unsplash.com/photo-1604908554049-9109f1d2ac69?w=800&q=60&auto=format&fit=crop' }}
+          source={{ uri: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800&q=60&auto=format&fit=crop' }}
           style={styles.thumb}
           contentFit="cover"
         />
