@@ -128,15 +128,25 @@ export default function OrderAssistantScreen() {
         </View>
       </Animated.View>
 
-      {/* Chat area */}
-      <KeyboardAvoidingView behavior={Platform.select({ ios: 'padding', android: undefined })} style={styles.flex}>
-        <ScrollView contentContainerStyle={styles.chatList} showsVerticalScrollIndicator={false}>
+      {/* Chat area with KeyboardAvoidingView */}
+      <KeyboardAvoidingView 
+        style={styles.flex}
+        behavior={Platform.select({ ios: 'padding', android: 'padding' })}
+        keyboardVerticalOffset={Platform.select({ ios: 90, android: 80 })}
+      >
+        <ScrollView 
+          contentContainerStyle={styles.chatList} 
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
           {messages.map((m) => (
             <View key={m.id} style={[styles.bubble, m.role === 'user' ? styles.userBubble : styles.assistantBubble]}>
               <Text style={m.role === 'user' ? styles.userText : styles.assistantText}>{m.text}</Text>
             </View>
           ))}
         </ScrollView>
+        
+        {/* Input bar */}
         <View style={styles.inputBar}>
           <TextInput
             style={styles.input}
