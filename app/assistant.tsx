@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Stack } from 'expo-router';
 import {
   Animated,
@@ -14,14 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-
-type UpdateItem = {
-  id: string;
-  title: string;
-  subtitle?: string;
-  color: string; // dot color
-  bg: string; // background color for pill/card
-};
+import { subscribeToOrderUpdates, type OrderUpdate } from '@/state/mockOrderStream';
 
 type ChatMessage = {
   id: string;
@@ -40,46 +33,14 @@ export default function OrderAssistantScreen() {
     },
   ]);
 
-  const updates: UpdateItem[] = useMemo(
-    () => [
-      {
-        id: 'u1',
-        title: 'Order Received',
-        subtitle: 'Pizza Palace · 2:15 PM',
-        color: '#22C55E',
-        bg: '#E9F8EF',
-      },
-      {
-        id: 'u2',
-        title: 'Preparing Order',
-        subtitle: 'Est. 15–20 minutes',
-        color: '#F59E0B',
-        bg: '#FEF3C7',
-      },
-      {
-        id: 'u3',
-        title: 'Driver Assigned',
-        subtitle: 'John · Honda Civic · ABC123',
-        color: '#3B82F6',
-        bg: '#DBEAFE',
-      },
-      {
-        id: 'u4',
-        title: 'Out for Delivery',
-        subtitle: '5 minutes away',
-        color: '#A855F7',
-        bg: '#F3E8FF',
-      },
-      {
-        id: 'u5',
-        title: 'Delivered',
-        subtitle: 'Pending…',
-        color: '#D1D5DB',
-        bg: '#F3F4F6',
-      },
-    ],
-    []
-  );
+  // Received updates from the mock backend stream
+  const [received, setReceived] = useState<OrderUpdate[]>([]);
+  useEffect(() => {
+    const unsub = subscribeToOrderUpdates('order-1', (u) => {
+      setReceived((prev) => [...prev, u]);
+    });
+    return unsub;
+  }, []);
 
   // Collapsible panel animation
   const heightAnim = useRef(new Animated.Value(1)).current; // 1 expanded, 0 collapsed
@@ -113,10 +74,20 @@ export default function OrderAssistantScreen() {
     }, 600);
   };
 
-  const updatesHeight = heightAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 220] });
+  // Animate to a sensible max height for 5 vertical items
+  // Measure content so the collapse expands to the right size
+  const [headerH, setHeaderH] = useState(0);
+  const [listH, setListH] = useState(0);
+  const updatesHeight = heightAnim.interpolate({ inputRange: [0, 1], outputRange: [0, Math.max(1, headerH + listH)] });
   const updatesOpacity = heightAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 1] });
 
-  const latestActive = updates[3]; // e.g., Out for Delivery
+  const latestActive = received[received.length - 1] ?? {
+    id: 'pending',
+    title: 'Waiting for updates',
+    subtitle: 'Tracking your order…',
+    color: '#22C55E',
+    bg: '#E9F8EF',
+  };
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
@@ -137,7 +108,7 @@ export default function OrderAssistantScreen() {
 
       {/* Live updates panel */}
       <Animated.View style={[styles.updatesPanel, { height: updatesHeight, opacity: updatesOpacity, overflow: 'hidden' }]}>        
-        <View style={styles.updatesHeader}>
+        <View style={styles.updatesHeader} onLayout={(e) => setHeaderH(e.nativeEvent.layout.height)}>
           <View style={[styles.dot, { backgroundColor: '#22C55E' }]} />
           <View style={{ flex: 1 }}>
             <Text style={styles.headerTitle}>AI Order Assistant</Text>
@@ -148,17 +119,13 @@ export default function OrderAssistantScreen() {
           </Pressable>
         </View>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 12, gap: 12 }}>
-          {updates.map((u, idx) => (
-            <View key={u.id} style={[styles.updateCard, { backgroundColor: u.bg, opacity: idx === updates.length - 1 ? 0.5 : 1 }]}>              
-              <View style={styles.updateHeader}>
-                <View style={[styles.dot, { backgroundColor: u.color }]} />
-                <Text style={styles.updateTitle}>{u.title}</Text>
-              </View>
-              {!!u.subtitle && <Text style={styles.updateSub}>{u.subtitle}</Text>}
-            </View>
+        {/* Vertical timeline list */}
+        <View style={styles.timelineWrap} onLayout={(e) => setListH(e.nativeEvent.layout.height)}>
+          <View style={styles.timelineLine} />
+          {received.map((u) => (
+            <AnimatedTimelineRow key={u.id} item={u} />
           ))}
-        </ScrollView>
+        </View>
       </Animated.View>
 
       {/* Chat area */}
@@ -211,6 +178,35 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 12,
     minWidth: 220,
+  },
+  // Timeline styles
+  timelineWrap: {
+    position: 'relative',
+    paddingHorizontal: 12,
+    paddingBottom: 8,
+    paddingTop: 4,
+    marginBottom: 4,
+  },
+  timelineLine: {
+    position: 'absolute',
+    left: 24,
+    top: 0,
+    bottom: 0,
+    width: 2,
+    backgroundColor: '#E5E7EB',
+  },
+  timelineRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    marginBottom: 10,
+    paddingLeft: 12,
+  },
+  timelineDot: { width: 12, height: 12, borderRadius: 6, marginLeft: 12, marginTop: 16 },
+  timelineCard: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 16,
   },
   updateHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
   updateTitle: { fontWeight: '700', color: '#111827' },
@@ -270,3 +266,25 @@ const styles = StyleSheet.create({
   },
 });
 
+// Animated row for timeline items
+const AnimatedTimelineRow: React.FC<{ item: OrderUpdate }> = ({ item }) => {
+  const opacity = useRef(new Animated.Value(0)).current;
+  const transY = useRef(new Animated.Value(12)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(opacity, { toValue: 1, duration: 220, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+      Animated.spring(transY, { toValue: 0, damping: 18, stiffness: 160, mass: 0.6, useNativeDriver: true }),
+    ]).start();
+  }, [opacity, transY]);
+
+  return (
+    <Animated.View style={[styles.timelineRow, { opacity, transform: [{ translateY: transY }] }]}> 
+      <View style={[styles.timelineDot, { backgroundColor: item.color }]} />
+      <View style={[styles.timelineCard, { backgroundColor: item.bg }]}> 
+        <Text style={[styles.updateTitle, { color: item.color }]}>{item.title}</Text>
+        {!!item.subtitle && <Text style={styles.updateSub}>{item.subtitle}</Text>}
+      </View>
+    </Animated.View>
+  );
+};
