@@ -78,3 +78,38 @@ export const yellowPromoItems = [
   },
 ];
 
+export const SPILLAGE_TRIGGER = 'the package i recieved had spillage issue';
+
+export const THINKING_SETS = {
+  entry: [
+    { tool: 'initiate_mediation_flow()', text: 'Detected damage report; opening mediation case' },
+    { tool: 'collect_evidence()', text: 'Requesting photos to assess severity' }
+  ],
+  firstPhoto: [
+    { tool: 'collect_photos()', text: 'Photo received; extracting spill cues' },
+    { tool: 'analyze_evidence()', text: 'Low coverage of spill area; confidence 0.64' }
+  ],
+  secondPhoto: [
+    { tool: 'collect_photos()', text: 'Additional angle received; stitching views' },
+    { tool: 'analyze_evidence()', text: 'Spill and soaked packaging visible; confidence 0.86' }
+  ],
+  verdict: [
+    { tool: 'analyze_evidence()', text: 'Aggregate signals exceed major-spill threshold' },
+    { tool: 'issue_instant_refund()', text: 'Issuing immediate refund to original payment method' },
+    { tool: 'log_merchant_packaging_feedback()', text: 'Sending detailed packaging feedback to merchant' }
+  ],
+};
+
+export const QUESTIONNAIRE = [
+  'Q1 • Was the outer seal/tamper tape intact?',
+  'Q2 • Any missing items or labels soaked/wet?',
+  'Q3 • About what time did you receive the order?'
+];
+
+export const MOCK_REFUND = {
+  amount: 120.0,
+  currency: 'INR',
+  id: 'RFND-MOCK-87231',
+  receipt:
+    'Refund initiated: ₹120.00\nRef: RFND-MOCK-87231\nMethod: Original payment\nETA: 3–5 business days\nWe have also notified the merchant with packaging QA details.'
+};

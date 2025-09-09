@@ -14,6 +14,15 @@ export const MOCK_UPDATES: OrderUpdate[] = [
   { id: 'u5', title: 'Delivered', subtitle: 'Pending…', color: '#D1D5DB', bg: '#F3F4F6' },
 ];
 
+// Order Closed update - only added manually when case is resolved
+export const ORDER_CLOSED_UPDATE: OrderUpdate = {
+  id: 'u6',
+  title: 'Order Closed',
+  subtitle: 'Case resolved with refund',
+  color: '#059669',
+  bg: '#D1FAE5'
+};
+
 export type Subscription = () => void;
 
 /**
