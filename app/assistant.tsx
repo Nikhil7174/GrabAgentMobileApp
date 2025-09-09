@@ -153,6 +153,77 @@ export default function OrderAssistantScreen() {
     }
   };
 
+  const renderEmphasizedText = (text: string) => {
+    // Define patterns for important terms
+    const patterns = [
+      { pattern: /(confidence:\s*\d+%)/gi, style: 'confidence' },
+      { pattern: /(\$\d+\.\d+)/g, style: 'refund' },
+      { pattern: /(CASE RESOLVED)/gi, style: 'bold' },
+      { pattern: /(REFUND RECEIPT)/gi, style: 'bold' },
+      { pattern: /(Order ID:\s*#[A-Z0-9-]+)/gi, style: 'bold' },
+      { pattern: /(Refund Amount:\s*\$\d+\.\d+)/gi, style: 'bold' },
+      { pattern: /(Processing Time:\s*\d+-\d+\s*business days)/gi, style: 'bold' },
+      { pattern: /(Reference:\s*REF-\d+)/gi, style: 'bold' },
+    ];
+
+    let parts = [{ text, style: 'normal' }];
+
+    patterns.forEach(({ pattern, style }) => {
+      const newParts: { text: string; style: string }[] = [];
+      parts.forEach(part => {
+        if (part.style !== 'normal') {
+          newParts.push(part);
+          return;
+        }
+        
+        const matches = Array.from(part.text.matchAll(pattern));
+        if (matches.length === 0) {
+          newParts.push(part);
+          return;
+        }
+
+        let lastIndex = 0;
+        matches.forEach(match => {
+          if (match.index !== undefined) {
+            // Add text before match
+            if (match.index > lastIndex) {
+              newParts.push({
+                text: part.text.slice(lastIndex, match.index),
+                style: 'normal'
+              });
+            }
+            // Add matched text with style
+            newParts.push({
+              text: match[0],
+              style: style
+            });
+            lastIndex = match.index + match[0].length;
+          }
+        });
+        // Add remaining text
+        if (lastIndex < part.text.length) {
+          newParts.push({
+            text: part.text.slice(lastIndex),
+            style: 'normal'
+          });
+        }
+      });
+      parts = newParts;
+    });
+
+    return parts.map((part, index) => {
+      if (part.style === 'normal') {
+        return <Text key={index}>{part.text}</Text>;
+      }
+      const styleKey = `emphasized${part.style.charAt(0).toUpperCase() + part.style.slice(1)}` as keyof typeof styles;
+      return (
+        <Text key={index} style={styles[styleKey]}>
+          {part.text}
+        </Text>
+      );
+    });
+  };
+
   const getResponseForState = (state: FlowState): string => {
     switch (state) {
       case 'initial':
@@ -357,7 +428,9 @@ Your refund is being processed and you should see it in your account within 2-3 
               )}
               {(!m.showThinking || completedThinking.has(m.id) || m.role === 'user') && (
                 <View style={[styles.bubble, m.role === 'user' ? styles.userBubble : styles.assistantBubble]}>
-                  <Text style={m.role === 'user' ? styles.userText : styles.assistantText}>{m.text}</Text>
+                  <Text style={m.role === 'user' ? styles.userText : styles.assistantText}>
+                    {m.role === 'assistant' ? renderEmphasizedText(m.text) : m.text}
+                  </Text>
                   {m.image && (
                     <Image source={{ uri: m.image }} style={styles.uploadedImage} />
                   )}
@@ -537,7 +610,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   updatesPanel: {
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#159445',
     paddingTop: 8,
     marginBottom: 8,
   },
@@ -605,14 +678,44 @@ const styles = StyleSheet.create({
   chatList: { paddingHorizontal: 12, paddingVertical: 8, gap: 8 },
   bubble: {
     maxWidth: '78%',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  assistantBubble: { alignSelf: 'flex-start', backgroundColor: '#E5F0FF' },
-  userBubble: { alignSelf: 'flex-end', backgroundColor: '#22C55E' },
+  assistantBubble: { 
+    alignSelf: 'flex-start', 
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  userBubble: { 
+    alignSelf: 'flex-end', 
+    backgroundColor: '#159445',
+    shadowColor: '#22C55E',
+    shadowOpacity: 0.3,
+  },
   assistantText: { color: '#111827' },
   userText: { color: 'white', fontWeight: '600' },
+  emphasizedConfidence: {
+    backgroundColor: '#FEF3C7',
+    color: '#D97706',
+    fontWeight: '700',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  emphasizedRefund: {
+    color: '#059669',
+    fontWeight: '700',
+  },
+  emphasizedBold: {
+    fontWeight: '700',
+  },
   inputBar: {
     flexDirection: 'row',
     alignItems: 'center',
