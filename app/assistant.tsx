@@ -35,6 +35,11 @@ type ChainOfThoughtStep = {
   observation?: string;
 };
 
+type Scenario = 'packaging_dispute' | 'overloaded_restaurant';
+
+// Toggle the active mocked scenario here
+const ACTIVE_SCENARIO: Scenario = 'overloaded_restaurant';
+
 type FlowState =
   | 'initial'
   | 'awaiting_first_photo'
@@ -43,7 +48,12 @@ type FlowState =
   | 'questionnaire_1'
   | 'questionnaire_2'
   | 'questionnaire_3'
-  | 'final_verdict';
+  | 'final_verdict'
+  // Overloaded restaurant scenario flow states
+  | 'overload_initial'
+  | 'overload_wait_voucher'
+  | 'overload_switch_suggestions'
+  | 'overload_switched_done';
 
 export default function OrderAssistantScreen() {
   const [collapsed, setCollapsed] = useState(false);
@@ -52,10 +62,15 @@ export default function OrderAssistantScreen() {
     {
       id: 'm1',
       role: 'assistant',
-      text: "Hi! I'm tracking your order. It has been delivered and is currently pending your confirmation.",
+      text:
+        ACTIVE_SCENARIO === 'overloaded_restaurant'
+          ? "Heads up — the restaurant is currently overloaded, and your delivery may arrive later than expected. I can help you decide: wait with a small voucher, or switch to a similar restaurant with a faster ETA."
+          : "Hi! I'm tracking your order. It has been delivered and is currently pending your confirmation.",
     },
   ]);
-  const [flowState, setFlowState] = useState<FlowState>('initial');
+  const [flowState, setFlowState] = useState<FlowState>(
+    ACTIVE_SCENARIO === 'overloaded_restaurant' ? 'overload_initial' : 'initial'
+  );
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [completedThinking, setCompletedThinking] = useState<Set<string>>(new Set());
 
@@ -85,15 +100,47 @@ export default function OrderAssistantScreen() {
       }
     }
   }, [flowState, completedThinking, messages]);
+  // Subscribe to normal mock stream only when not running overloaded restaurant scenario
   useEffect(() => {
+    if (ACTIVE_SCENARIO === 'overloaded_restaurant') {
+      return;
+    }
     const unsub = subscribeToOrderUpdates('order-1', (u) => {
       setReceived((prev) => [...prev, u]);
     });
     return unsub;
   }, []);
 
+  // Overloaded flow: control live updates explicitly
+  useEffect(() => {
+    if (ACTIVE_SCENARIO !== 'overloaded_restaurant') return;
+
+    const ORDER_RECEIVED: OrderUpdate = {
+      id: 'ol-1',
+      title: 'Order Received',
+      subtitle: 'Restaurant acknowledged your order',
+      color: '#22C55E',
+      bg: '#E9F8EF',
+    };
+    const PREPARING_ORDER: OrderUpdate = {
+      id: 'ol-2',
+      title: 'Preparing Order',
+      subtitle: 'Kitchen is getting started',
+      color: '#F59E0B',
+      bg: '#FEF3C7',
+    };
+
+    if (flowState === 'overload_initial' || flowState === 'overload_switch_suggestions') {
+      setReceived([ORDER_RECEIVED]);
+    }
+    if (flowState === 'overload_wait_voucher' || flowState === 'overload_switched_done') {
+      setReceived([PREPARING_ORDER]);
+    }
+  }, [flowState]);
+
 
   const heightAnim = useRef(new Animated.Value(1)).current;
+  const newId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const animateCollapse = (toCollapsed: boolean) => {
     setCollapsed(toCollapsed);
     Animated.timing(heightAnim, {
@@ -148,6 +195,30 @@ export default function OrderAssistantScreen() {
           { id: '2', reasoning: 'Product significantly damaged, refund justified', tool: 'issue_instant_refund()' },
           { id: '3', reasoning: 'Logging packaging feedback for merchant improvement', tool: 'log_merchant_packaging_feedback()', observation: 'Case resolved with refund' }
         ];
+      case 'overload_initial':
+        return [
+          { id: '1', reasoning: 'Check current merchant load and ETA impact', tool: 'get_merchant_status()' },
+          { id: '2', reasoning: 'Proactively inform user about delays', tool: 'notify_customer()', observation: 'Explain wait or switch options' },
+          { id: '3', reasoning: 'Prepare alternatives with similar cuisine and price', tool: 'get_nearby_merchants()' },
+        ];
+      case 'overload_wait_voucher':
+        return [
+          { id: '1', reasoning: 'User chose to wait; apply courtesy voucher', tool: 'notify_customer()', observation: 'Voucher confirmation sent' },
+          { id: '2', reasoning: 'Re-check merchant load for updated ETA', tool: 'get_merchant_status()' },
+          { id: '3', reasoning: 'Confirm updated ETA and voucher in wallet', tool: 'notify_customer()' },
+        ];
+      case 'overload_switch_suggestions':
+        return [
+          { id: '1', reasoning: 'Fetch similar restaurants nearby', tool: 'get_nearby_merchants()' },
+          { id: '2', reasoning: 'Rank choices by ETA and price similarity', tool: 'rank_candidates()' },
+          { id: '3', reasoning: 'Present options to customer', tool: 'notify_customer()', observation: 'Carousel with tap-to-choose' },
+        ];
+      case 'overload_switched_done':
+        return [
+          { id: '1', reasoning: 'Cancel original order due to overload', tool: 'cancel_order()' },
+          { id: '2', reasoning: 'Place new order with selected merchant', tool: 'place_order()' },
+          { id: '3', reasoning: 'Notify customer with new ETA', tool: 'notify_customer()', observation: 'Switch completed' },
+        ];
       default:
         return [];
     }
@@ -164,6 +235,10 @@ export default function OrderAssistantScreen() {
       { pattern: /(Refund Amount:\s*\$\d+\.\d+)/gi, style: 'bold' },
       { pattern: /(Processing Time:\s*\d+-\d+\s*business days)/gi, style: 'bold' },
       { pattern: /(Reference:\s*REF-\d+)/gi, style: 'bold' },
+      // Price and action terms
+      { pattern: /(Price:?\s*\$?\d+(?:\.\d+)?)/gi, style: 'bold' },
+      // Order alternates longest-first to avoid partial matches like 'cancel' inside 'cancelled'
+      { pattern: /(cancelled|cancellation|reorder|cancel)/gi, style: 'bold' },
     ];
 
     let parts = [{ text, style: 'normal' }];
@@ -253,6 +328,14 @@ Reference: REF-${Date.now()}
 "Packaging quality requires improvement. Multiple spillage incidents detected. Recommend stronger sealing and protective wrapping for liquid/powder products."
 
 Your refund is being processed and you should see it in your account within 2-3 business days. Is there anything else I can help you with?`;
+      case 'overload_initial':
+        return "I can help in two ways:\n\n1) Wait for this restaurant — I’ll add a small voucher to your GrabPay wallet for the delay.\n2) Switch to a similar restaurant — I’ll show fast alternatives with similar prices and shorter ETAs.\n\nTell me ‘wait’ or ‘switch’, or tap an option below.";
+      case 'overload_wait_voucher':
+        return "Thanks for waiting! I’ve added a small voucher to your GrabPay wallet and prioritized your order. Updated ETA: about 20–25 minutes. You’ll see the discount automatically on your next order.";
+      case 'overload_switch_suggestions':
+        return "Here are similar options with faster ETAs. Pick one to switch your order.";
+      case 'overload_switched_done':
+        return "Done! I’ve cancelled the previous order and placed a new one with your selection. You’ll receive live updates shortly.";
       default:
         return "I'm here to help with your order concerns.";
     }
@@ -277,7 +360,7 @@ Your refund is being processed and you should see it in your account within 2-3 
       setUploadedImages(prev => [...prev, imageUri]);
 
       const userMsg: ChatMessage = {
-        id: String(Date.now()),
+        id: newId(),
         role: 'user',
         text: 'Photo uploaded',
         image: imageUri
@@ -298,13 +381,12 @@ Your refund is being processed and you should see it in your account within 2-3 
         const responseText = getResponseForState(nextState);
 
         const assistantMsg: ChatMessage = {
-          id: String(Date.now() + 1),
+          id: newId(),
           role: 'assistant',
           text: responseText,
           chainOfThought,
           showThinking: true
         };
-
         setMessages(prev => [...prev, assistantMsg]);
         setFlowState(nextState);
       }, 800);
@@ -316,7 +398,7 @@ Your refund is being processed and you should see it in your account within 2-3 
     if (!trimmed) return;
     if (!collapsed) animateCollapse(true);
 
-    const userMsg: ChatMessage = { id: String(Date.now()), role: 'user', text: trimmed };
+    const userMsg: ChatMessage = { id: newId(), role: 'user', text: trimmed };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
 
@@ -324,7 +406,24 @@ Your refund is being processed and you should see it in your account within 2-3 
       let nextState: FlowState = flowState;
       let responseText = '';
 
-      if (flowState === 'initial' && trimmed.toLowerCase().includes('spillage')) {
+      if (ACTIVE_SCENARIO === 'overloaded_restaurant') {
+        const lower = trimmed.toLowerCase();
+        if (flowState === 'overload_initial') {
+          if (lower.includes('wait')) {
+            nextState = 'overload_wait_voucher';
+            responseText = getResponseForState('overload_wait_voucher');
+          } else if (lower.includes('switch')) {
+            nextState = 'overload_switch_suggestions';
+            responseText = getResponseForState('overload_switch_suggestions');
+          } else {
+            responseText = getResponseForState('overload_initial');
+          }
+        } else if (flowState === 'overload_switch_suggestions') {
+          // Free text selection can also trigger switch completion
+          nextState = 'overload_switched_done';
+          responseText = getResponseForState('overload_switched_done');
+        }
+      } else if (flowState === 'initial' && trimmed.toLowerCase().includes('spillage')) {
         nextState = 'awaiting_first_photo';
         responseText = getResponseForState('initial');
       } else if (flowState === 'questionnaire_1') {
@@ -343,19 +442,87 @@ Your refund is being processed and you should see it in your account within 2-3 
       const chainOfThought = nextState !== flowState ? generateChainOfThought(nextState === 'awaiting_first_photo' ? 'initial' : nextState, trimmed) : undefined;
 
       const assistantMsg: ChatMessage = {
-        id: String(Date.now() + 1),
+        id: newId(),
         role: 'assistant',
         text: responseText,
         chainOfThought,
         showThinking: !!chainOfThought
       };
-
       setMessages(prev => [...prev, assistantMsg]);
       if (nextState !== flowState) {
         setFlowState(nextState);
       }
     }, 600);
   };
+
+  // --- Overloaded flow UI helpers ---
+  const sendAssistantWithSkeleton = (text: string, stateForThought?: FlowState, userInput?: string) => {
+    const chain = stateForThought ? generateChainOfThought(stateForThought, userInput) : undefined;
+    setMessages(prev => [
+      ...prev,
+      {
+        id: newId(),
+        role: 'assistant',
+        text,
+        chainOfThought: chain,
+        showThinking: !!chain,
+      },
+    ]);
+  };
+
+  const OptionButtons: React.FC = () => (
+    <View style={{ flexDirection: 'row', gap: 8, marginTop: 6 }}>
+      <Pressable
+        onPress={() => {
+          setMessages(prev => [...prev, { id: newId(), role: 'user', text: 'wait' }]);
+          setFlowState('overload_wait_voucher');
+          sendAssistantWithSkeleton(getResponseForState('overload_wait_voucher'), 'overload_wait_voucher');
+        }}
+        style={{ backgroundColor: '#159445', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 9999 }}
+      >
+        <Text style={{ color: 'white', fontWeight: '700' }}>Wait + voucher</Text>
+      </Pressable>
+      <Pressable
+        onPress={() => {
+          setMessages(prev => [...prev, { id: newId(), role: 'user', text: 'switch' }]);
+          setFlowState('overload_switch_suggestions');
+          sendAssistantWithSkeleton(getResponseForState('overload_switch_suggestions'), 'overload_switch_suggestions');
+        }}
+        style={{ backgroundColor: '#111827', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 9999 }}
+      >
+        <Text style={{ color: 'white', fontWeight: '700' }}>Switch restaurant</Text>
+      </Pressable>
+    </View>
+  );
+
+  const suggestions = [
+    { id: 's1', title: 'FastBite Burgers', eta: '12–15 min', price: '$$ · RM 24 avg', color: '#DBEAFE', image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&q=60&auto=format&fit=crop' },
+    { id: 's2', title: 'Quick Noodles', eta: '10–12 min', price: '$ · RM 18 avg', color: '#FEE2E2', image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=60&auto=format&fit=crop' },
+    { id: 's3', title: 'Taco Express', eta: '15–18 min', price: '$$ · RM 22 avg', color: '#D1FAE5', image: 'https://images.unsplash.com/photo-1562967914-608f82629710?w=400&q=60&auto=format&fit=crop' },
+  ];
+
+  const SuggestionCarousel: React.FC = () => (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingVertical: 6, paddingRight: 12 }}>
+      {suggestions.map(s => (
+        <View key={s.id} style={{ width: 220, backgroundColor: 'white', borderRadius: 14, padding: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: '#E5E7EB' }}>
+          <Image source={{ uri: s.image }} style={{ width: '100%', height: 110, borderRadius: 10, backgroundColor: s.color }} />
+          <Text style={{ marginTop: 8, fontWeight: '800', color: '#111827' }}>{s.title}</Text>
+          <Text style={{ color: '#374151', marginTop: 2 }}><Text style={{ fontWeight: '700' }}>ETA:</Text> {s.eta}</Text>
+          <Text style={{ color: '#374151' }}><Text style={{ fontWeight: '700' }}>Price:</Text> {s.price}</Text>
+          <Pressable
+            onPress={() => {
+              setMessages(prev => [...prev, { id: newId(), role: 'user', text: `Select: ${s.title}` }]);
+              setFlowState('overload_switched_done');
+              sendAssistantWithSkeleton(getResponseForState('overload_switched_done'), 'overload_switched_done');
+            }}
+            style={{ marginTop: 10, backgroundColor: '#159445', paddingVertical: 10, paddingHorizontal: 12, borderRadius: 10, alignItems: 'center' }}
+          >
+            <Text style={{ color: 'white', fontWeight: '800' }}>Choose</Text>
+          </Pressable>
+        </View>
+      ))}
+    </ScrollView>
+  );
 
   const [headerH, setHeaderH] = useState(0);
   const [listH, setListH] = useState(0);
@@ -416,7 +583,7 @@ Your refund is being processed and you should see it in your account within 2-3 
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {messages.map((m) => (
+          {messages.map((m, i) => (
             <View key={m.id}>
               {m.role === 'assistant' && m.chainOfThought && m.showThinking && (
                 <ChainOfThoughtComponent 
@@ -431,9 +598,18 @@ Your refund is being processed and you should see it in your account within 2-3 
                   <Text style={m.role === 'user' ? styles.userText : styles.assistantText}>
                     {m.role === 'assistant' ? renderEmphasizedText(m.text) : m.text}
                   </Text>
+                  {m.role === 'assistant' && flowState === 'overload_initial' && i === messages.length - 1 && (
+                    <OptionButtons />
+                  )}
                   {m.image && (
                     <Image source={{ uri: m.image }} style={styles.uploadedImage} />
                   )}
+                </View>
+              )}
+              {/* Render carousel outside the reply bubble */}
+              {m.role === 'assistant' && flowState === 'overload_switch_suggestions' && i === messages.length - 1 && completedThinking.has(m.id) && (
+                <View style={{ marginTop: 8, paddingHorizontal: 12 }}>
+                  <SuggestionCarousel />
                 </View>
               )}
             </View>

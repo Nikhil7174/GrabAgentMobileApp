@@ -35,7 +35,7 @@ function currency(n: number) {
 export default function OrderScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { show } = useOrderToast();
+  const { show, startOverloadFlow } = useOrderToast();
   const subtotal = orderItems.reduce((s, i) => s + i.price * i.qty, 0);
   const delivery = 2.9;
   const total = subtotal + delivery;
@@ -102,6 +102,8 @@ export default function OrderScreen() {
           style={styles.placeOrder}
           onPress={() => {
             show({ restaurant: 'McDonald’s - Simpang Dewa Ruci', etaText: 'By 1:00 pm' });
+            // Start the hardcoded overload flow that updates the toast after ~15 seconds
+            startOverloadFlow({ restaurant: 'McDonald’s - Simpang Dewa Ruci', etaText: 'By 1:00 pm', ctaRoute: '/assistant' });
             router.push('/track');
           }}
           accessibilityRole="button"
